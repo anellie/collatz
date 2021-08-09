@@ -3,17 +3,18 @@ package xyz.angm.collatz
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.lang.Long.min
 import java.util.concurrent.atomic.AtomicLong
 
-const val MAX = 10_000_000L
-const val MAX_MAP = 1_000_000L
-const val BLOCK_SIZE = 1000L
+fun main(args: Array<String>) {
+    val max = args[0].toLong()
+    val maxMap = min(10_000_000L, max / 10L)
+    val blockSize = maxMap / 1000L
 
-fun main() {
     var total = 0L
-    val map = LongArray(MAX_MAP.toInt())
+    val map = LongArray(maxMap.toInt())
 
-    for (num in 2L until MAX_MAP) {
+    for (num in 2L until maxMap) {
         val res = exec(num, num, map)
         total += res
         map[num.toInt()] = res
@@ -21,10 +22,10 @@ fun main() {
 
     val atom = AtomicLong()
     runBlocking {
-        for (blockStart in MAX_MAP until MAX step BLOCK_SIZE) {
+        for (blockStart in maxMap until max step blockSize) {
             launch(Dispatchers.Default) {
-                for (num in blockStart until (blockStart + BLOCK_SIZE)) {
-                    atom.addAndGet(exec(num, MAX_MAP, map))
+                for (num in blockStart until (blockStart + blockSize)) {
+                    atom.addAndGet(exec(num, maxMap, map))
                 }
             }
         }

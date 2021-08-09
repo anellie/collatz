@@ -1,30 +1,24 @@
 use rayon::prelude::*;
-
-const MAX: usize = 1_000_000_000;
-const MAX_MAP: usize = {
-    let res = MAX / 10;
-    if res > 50_000_000 {
-        50_000_000
-    } else {
-        res
-    }
-};
+use std::env;
 
 fn main() {
+    let max = env::args().nth(1).unwrap().parse::<usize>().unwrap();
+    let max_map = usize::min(50_000_000, max / 10);
+
     let mut total = 0;
-    let mut map = Vec::with_capacity(MAX_MAP + 4);
+    let mut map = Vec::with_capacity(max_map + 4);
     map.push(0);
     map.push(0);
 
-    for num in 2..MAX_MAP {
+    for num in 2..max_map {
         let count = exec(num, num, &map);
         total += count;
         map.push(count);
     }
 
-    total += ((MAX_MAP )..MAX)
+    total += ((max_map)..=max)
         .into_par_iter()
-        .map(|num| exec(num, MAX_MAP, &map))
+        .map(|num| exec(num, max_map, &map))
         .sum::<usize>();
 
     println!("{}", total);
