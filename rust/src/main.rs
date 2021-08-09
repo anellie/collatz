@@ -1,6 +1,6 @@
 use rayon::prelude::*;
 
-const MAX: usize = 10_000_000;
+const MAX: usize = 1_000_000_000;
 const MAX_MAP: usize = {
     let res = MAX / 10;
     if res > 50_000_000 {
@@ -31,16 +31,25 @@ fn main() {
 }
 
 #[inline]
-fn exec(initial: usize, min_bound: usize, map: &Vec<usize>) -> usize {
+fn exec(initial: usize, min_bound: usize, map: &[usize]) -> usize {
     let mut step_count = 0;
     let mut current = initial;
+
+    if (current & 1) == 0 {
+        let trailing = current.trailing_zeros();
+        step_count += trailing as usize;
+        current >>= trailing;
+    }
+
     while current >= min_bound {
         if (current & 1) == 0 {
             current /= 2;
+            step_count += 1;
         } else {
-            current = (current * 3) + 1;
+            current = ((current * 3) + 1) / 2;
+            step_count += 2;
         }
-        step_count += 1;
     }
+
     step_count + map[current]
 }
